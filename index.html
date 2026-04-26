@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React JS Mastery | SEO Blog Project</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- CSS STYLES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body { background-color: #f4f7f6; color: #333; }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 1rem 5%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: bold; color: #333; }
+        .logo span { color: #61dafb; }
+
+        .nav-links { display: flex; list-style: none; gap: 2rem; align-items: center;}
+        .nav-links a { text-decoration: none; color: #555; font-weight: 500; transition: 0.3s; cursor: pointer; }
+        .nav-links a:hover { color: #61dafb; }
+
+        .container { max-width: 1100px; margin: 2rem auto; padding: 0 20px; }
+
+        .login-btn {
+            background: #61dafb;
+            color: #222 !important;
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-weight: bold !important;
+        }
+
+        /* Blog Card Hover Effect */
+        .blog-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Modal Styling */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 2000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.5); 
+        }
+        .modal-content { 
+            background: white; 
+            margin: 10% auto; 
+            padding: 30px; 
+            width: 350px; 
+            border-radius: 10px; 
+            position: relative; 
+        }
+        .close { position: absolute; right: 20px; top: 10px; cursor: pointer; font-size: 1.5rem; }
+
+        #loginForm input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #61dafb;
+            border: none;
+            color: #222;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">React<span>SEO</span></div>
+        <ul class="nav-links">
+            <li><a onclick="showPage('home')">Home</a></li>
+            <li><a onclick="showPage('blogs')">Blogs</a></li>
+            <li><a onclick="showPage('contact')">Contact</a></li>
+            <li><a class="login-btn" onclick="openLogin()">Login</a></li>
+        </ul>
+    </nav>
+
+    <div id="content-area" class="container">
+        </div>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLogin()">&times;</span>
+            <h2>Login to Dashboard</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <input type="text" placeholder="Username" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit" class="btn">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 1. Full Database of 20 Comprehensive Blogs
+        const blogData = [
+            { id: 1, title: "Introduction to React JS", content: "React is not a framework; it's a powerful JavaScript library for building user interfaces. Maintained by Meta, it revolutionized web development by introducing the 'Virtual DOM'. This allows React to update only the parts of the page that change, making apps incredibly fast. Key benefits include component-based architecture, declarative UI, and a massive ecosystem of libraries." },
+            { id: 2, title: "Setting Up Your Workspace", content: "To build professional React apps, you need a solid environment. 1. Install Node.js (LTS version). 2. Use a code editor like VS Code. 3. Initialize your project using 'npx create-react-app my-app' or the faster 'npm create vite@latest'. Vite is highly recommended in 2026 for its lightning-fast HMR (Hot Module Replacement)." },
+            { id: 3, title: "The Magic of JSX", content: "JSX (JavaScript XML) allows us to write HTML structures directly inside JavaScript. It’s not a string or HTML; it’s a syntax extension. Behind the scenes, Babel transforms JSX into 'React.createElement()' calls. Remember: you must return a single parent element (or a Fragment <></>) and use 'className' instead of 'class'." },
+            { id: 4, title: "Functional Components", content: "Components are the atoms of React. Modern React focuses on Functional Components. They are simply JavaScript functions that return JSX. They are easier to read, test, and use with Hooks. A component should be 'pure', meaning it doesn't change its inputs (props) and always returns the same output for the same props." },
+            { id: 5, title: "Mastering Props & State", content: "Props (Properties) are read-only data passed from parent to child. State is the 'memory' of a component—data that changes over time (like a counter or form input). When state updates, React automatically re-renders the component. Rule of thumb: use Props for configuration and State for interactivity." },
+            { id: 6, title: "Hook: useState Deep Dive", content: "The useState hook is your first step into React interactivity. It returns an array with two elements: the current value and a setter function. Important: never mutate state directly (e.g., state++). Always use the setter function to trigger a re-render and ensure the UI stays in sync with your data." },
+            { id: 7, title: "Hook: useEffect Life Cycle", content: "useEffect lets you perform side effects in functional components. Think of it as a combination of componentDidMount, componentDidUpdate, and componentWillUnmount. You use it for API calls, timers, or manual DOM updates. Always include a dependency array [] to control when the effect runs and avoid infinite loops." },
+            { id: 8, title: "Conditional Rendering", content: "In React, you don't need a special syntax for 'if-else'. You use standard JavaScript logic. The Ternary Operator (condition ? true : false) is perfect for toggling elements, while the Logical AND (&&) is great for showing something only if a condition is met. This keeps your UI logic clean and predictable." },
+            { id: 9, title: "Lists and Key Prop", content: "Rendering lists is done using the '.map()' function. Every item in the list needs a unique 'key' prop. Keys help React identify which items have changed, been added, or removed. Avoid using array indexes as keys if the list can be reordered, as it can cause performance issues and UI bugs." },
+            { id: 10, title: "Controlled Form Inputs", content: "Forms in React are 'controlled' when the input value is driven by React state. By linking the 'value' attribute to a state variable and the 'onChange' handler to a setter function, you ensure that the 'Single Source of Truth' is always your component state, making validation and submission easy." },
+            { id: 11, title: "Lifting State Up", content: "Sometimes two child components need to share data. Since data only flows down in React, you must move the state to their closest common parent. This pattern is called 'Lifting State Up'. The parent then passes the state down as props and provides functions to allow children to update that parent state." },
+            { id: 12, title: "React Router Navigation", content: "React is for Single Page Applications (SPAs). React Router allows you to create multiple 'pages' without the browser refreshing. You define Routes that map URL paths to specific components. This provides a seamless, app-like experience for the user while maintaining SEO-friendly URLs." },
+            { id: 13, title: "CSS Modules & Styling", content: "Global CSS can lead to naming conflicts. CSS Modules solve this by scoping styles to the component. By naming your file 'Header.module.css', the classes become local variables. Other popular options include Styled-Components (CSS-in-JS) and Tailwind CSS for utility-first rapid development." },
+            { id: 14, title: "The Context API", content: "Context provides a way to share data like 'User Info' or 'Theme' throughout the entire app without 'prop drilling' (passing props through 10 levels). It consists of a Provider (to wrap your app) and a Consumer (or the useContext hook) to access the data anywhere in the tree." },
+            { id: 15, title: "Memoization & Performance", content: "As apps grow, performance matters. React.memo prevents a component from re-rendering if its props haven't changed. useMemo caches the result of expensive calculations, and useCallback caches function definitions. Use these tools sparingly—only when you notice actual performance bottlenecks." },
+            { id: 16, title: "API Calls with Axios", content: "While 'fetch' is built-in, Axios is a favorite for its simplicity and automatic JSON transformation. When fetching data, always handle the 'Loading' and 'Error' states. Use useEffect to trigger the call when the component mounts and clean up any pending requests if the component unmounts." },
+            { id: 17, title: "Building Custom Hooks", content: "Custom Hooks allow you to extract component logic into reusable functions. If you find yourself writing the same useEffect logic for window resizing or API fetching in multiple components, wrap it in a function starting with 'use' (e.g., useFetch). This keeps your components lean and focused on the UI." },
+            { id: 18, title: "Error Boundaries", content: "A JavaScript error in a component shouldn't crash the whole app. Error Boundaries are special class components that catch errors in their child component tree and display a 'fallback UI'. This improves user experience by gracefully handling failures in specific parts of the dashboard." },
+            { id: 19, title: "Deployment & Vercel", content: "Once your app is ready, Vercel is the gold standard for deployment. It integrates directly with GitHub. Every time you push code, Vercel automatically builds and deploys your site. It offers features like 'Preview Deployments' and global edge networks to ensure your React app is fast worldwide." },
+            { id: 20, title: "React 18 & Beyond", content: "React 18 introduced Concurrent Rendering. Features like 'Transitions' allow you to prioritize urgent updates (typing) over non-urgent ones (filtering a list). Suspense for data fetching and Server Components are also part of the modern roadmap, pushing React toward even better performance and developer experience." }
+        ];
+
+        // Modal Controls
+        function openLogin() { document.getElementById('loginModal').style.display = 'block'; }
+        function closeLogin() { document.getElementById('loginModal').style.display = 'none'; }
+
+        // 2. Navigation Controller
+        function showPage(page) {
+            const area = document.getElementById('content-area');
+            area.innerHTML = ''; 
+
+            if (page === 'login-view') {
+                area.innerHTML = `
+                    <div style="height: 80vh; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: white; padding: 50px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center;">
+                            <h2 style="font-size: 2rem; margin-bottom: 10px; color: #333;">Welcome Back</h2>
+                            <p style="color: #666; margin-bottom: 30px;">Login to access your React Curriculum</p>
+                            <form onsubmit="handleLogin(event)" style="display: flex; flex-direction: column; gap: 15px;">
+                                <input type="email" id="email" placeholder="Email Address" required style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                                <input type="password" id="password" placeholder="Password" required style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                                <button type="submit" style="background: #61dafb; color: #222; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; margin-top: 10px;">Sign In</button>
+                            </form>
+                            <p style="margin-top: 20px; font-size: 0.9rem; color: #888;">Project Year: 2026</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            else if (page === 'home') {
+                area.innerHTML = `
+                    <div class="hero-section" style="text-align:center; padding: 100px 20px;">
+                        <h1 style="font-size: 3.5rem; color: #333; margin-bottom: 10px;">Master React JS</h1>
+                        <p style="font-size: 1.4rem; color: #666; max-width: 700px; margin: auto;">An intensive, 20-module curriculum designed to take you from Zero to Senior Developer.</p>
+                        <button onclick="showPage('blogs')" style="padding: 18px 40px; background: #61dafb; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 30px; font-size: 1.1rem; transition: 0.3s;">Browse Curriculum</button>
+                    </div>
+                `;
+            } 
+            
+            else if (page === 'blogs') {
+                let blogHtml = `
+                    <div style="text-align: center; margin-bottom: 50px;">
+                        <h2 style="font-size: 2.5rem; color: #222;">Learning Path</h2>
+                        <p style="color: #777;">Complete all 20 modules to earn your certification.</p>
+                    </div>
+                    <div class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">`;
+                
+                blogData.forEach(blog => {
+                    blogHtml += `
+                        <div class="blog-card" style="background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 6px solid #61dafb; transition: transform 0.3s; cursor:default;">
+                            <span style="font-size: 0.75rem; color: #61dafb; font-weight: 800; letter-spacing: 1px;">MODULE ${blog.id.toString().padStart(2, '0')}</span>
+                            <h3 style="margin: 15px 0; font-size: 1.4rem; color: #333;">${blog.title}</h3>
+                            <p style="color: #666; font-size: 0.95rem; line-height: 1.6;">${blog.content.substring(0, 100)}...</p>
+                            <button onclick="viewFullBlog(${blog.id})" style="background: none; color: #007bff; border: none; padding: 0; cursor: pointer; font-weight: bold; margin-top: 20px; font-size: 1rem;">Read Module Details →</button>
+                        </div>
+                    `;
+                });
+                blogHtml += '</div>';
+                area.innerHTML = blogHtml;    
+            }
+            else if (page === 'contact') {
+                area.innerHTML = `
+                    <div style="max-width: 600px; margin: 50px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                        <h2>Get in Touch</h2>
+                        <form onsubmit="event.preventDefault(); alert('Message sent!'); showPage('home');" style="display: flex; flex-direction: column; gap: 15px;">
+                            <input type="text" placeholder="Your Name" required style="padding: 12px; border: 1px solid #ddd; border-radius: 5px;">
+                            <textarea placeholder="Your Message" rows="5" required style="padding: 12px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
+                            <button type="submit" style="background: #333; color: white; padding: 15px; border: none; border-radius: 5px; cursor: pointer;">Send Message</button>
+                        </form>
+                    </div>
+                `;
+            }
+        }
+
+        // 3. Detailed Blog View
+        function viewFullBlog(id) {
+            const blog = blogData.find(b => b.id === id);
+            const area = document.getElementById('content-area');
+            
+            area.innerHTML = `
+                <div style="background: white; padding: 60px; border-radius: 20px; max-width: 850px; margin: 40px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <button onclick="showPage('blogs')" style="margin-bottom: 20px; cursor: pointer; padding: 8px 15px; border-radius: 5px; border: 1px solid #ddd; background: #f9f9f9;">← Back to Curriculum</button>
+                    <div style="color: #61dafb; font-weight: bold;">MODULE ${blog.id}</div>
+                    <h1 style="font-size: 2.5rem; margin-top: 10px;">${blog.title}</h1>
+                    <p style="line-height: 1.8; color: #444; font-size: 1.1rem;">${blog.content}</p>
+                    
+                    <div style="background: #f9f9f9; padding: 20px; border-left: 4px solid #61dafb; margin: 30px 0;">
+                        <h4 style="margin-top:0;">Key Takeaways:</h4>
+                        <ul>
+                            <li>Deep dive into ${blog.title} logic.</li>
+                            <li>Industry best practices for 2026.</li>
+                        </ul>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="triggerDownload(${blog.id})" 
+                                style="background: #28a745; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; min-width: 200px; font-size: 1rem;">
+                            Download Module Notes (.TXT)
+                        </button>
+                        <button style="background: #eee; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; min-width: 200px;">Ask a Mentor</button>
+                    </div>
+                </div>
+            `;
+            window.scrollTo(0,0);
+        }
+
+        // 4. Download Logic
+        function triggerDownload(id) {
+            const blog = blogData.find(b => b.id === id);
+            if(!blog) return;
+
+            const textToSave = `
+=========================================
+REACT JS MASTERCLASS 2026
+=========================================
+MODULE ${blog.id}: ${blog.title.toUpperCase()}
+
+SUMMARY:
+${blog.content}
+
+-----------------------------------------
+Keep learning and building!
+© 2026 SEO Education Project
+=========================================
+            `;
+
+            const blob = new Blob([textToSave], { type: 'text/plain;charset=utf-8' });
+            const downloadLink = document.createElement("a");
+            const fileName = `Module_${blog.id}_${blog.title.replace(/\s+/g, '_')}.txt`;
+            
+            downloadLink.download = fileName;
+            const url = window.URL.createObjectURL(blob);
+            downloadLink.href = url;
+
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+
+            setTimeout(() => {
+                document.body.removeChild(downloadLink);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        }
+
+        // 5. App Setup
+        function handleLogin(event) {
+            event.preventDefault();
+            closeLogin();
+            showPage('home');
+        }
+
+        window.onload = () => showPage('login-view');
+    </script>
+</body>
+</html>
